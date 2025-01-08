@@ -511,4 +511,7 @@ def update_proxy(message):
 def invalid_command(message):
     bot.reply_to(message, 'Lệnh không hợp lệ. Vui lòng sử dụng lệnh /help để xem danh sách lệnh.')
 
+thread = threading.Thread(target=auto_check_proxy)
+thread.daemon = True
+thread.start()
 bot.infinity_polling(timeout=60, long_polling_timeout = 1)
