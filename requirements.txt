@@ -1,0 +1,6 @@
+telebot
+psutil
+requests
+fake-useragent
+cluster
+request
