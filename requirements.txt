@@ -3,3 +3,8 @@ psutil
 requests
 fake-useragent
 request
+http2 
+cluster
+crypto 
+user-agents
+header-generator
