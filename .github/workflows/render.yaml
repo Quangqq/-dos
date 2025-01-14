@@ -2,7 +2,7 @@ services:
   - type: web
     name: go-app
     runtime: go
-    buildCommand: go build -o app
+    buildCommand: go build -o schv1 cm.go
     startCommand: ./app
     env:
       - key: GO_ENV
