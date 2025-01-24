@@ -15,7 +15,7 @@ import io
 import re
 import threading
 
-bot_token = '7236746522:AAHwzWIRB7V8dRHlG-FWTpPwmr1h968sPYk' 
+bot_token = '8152527907:AAFjtXCIPYHTErd9r8us8ScyvCydeL8y6nM' 
 bot = telebot.TeleBot(bot_token)
 
 allowed_users = []
