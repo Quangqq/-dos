@@ -1,10 +1,9 @@
-telebot
-psutil
-requests
-fake-useragent
-request
-http2 
-cluster
+colors cluster 
 crypto 
-user-agents
-header-generator
+fs 
+url 
+http2 
+telebot 
+tls 
+os 
+psutil
