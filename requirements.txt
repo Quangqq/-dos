@@ -1,10 +1,2 @@
-colors 
-cluster 
-crypto 
-fs 
-url 
-http2 
 telebot 
-tls 
-os 
 psutil
