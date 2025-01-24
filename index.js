@@ -2,7 +2,7 @@ const express = require("express");
 const { exec } = require("child_process");
 
 // Cấu hình API
-const api_port = 8888; // Cổng API
+const api_port = 4000; // Cổng API
 const domain_lock = true; // Chỉ cho phép API hoạt động từ một miền cụ thể
 const api_domain = "dos-ime7.onrender.com"; // Miền API của bạn nếu `domain_lock` là `true`
 
