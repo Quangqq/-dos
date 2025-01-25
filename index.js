@@ -58,17 +58,21 @@ app.get(`/api`, async (req, res) => {
 });
 
 // Route tải proxy tự động
-app.get('/proxy', async (req, res) => {
+async function downloadProxy() {
     const proxyUrl = "https://sunny9577.github.io/proxy-scraper/proxies.txt";
     try {
         const response = await axios.get(proxyUrl);
         fs.writeFileSync('proxies.txt', response.data);
         console.log(`Đã tải và lưu proxy vào tệp proxies.txt`);
-        return res.json({ status: 200, message: "Đã tải proxy thành công" });
     } catch (error) {
         console.error(`Lỗi khi tải proxy: ${error.message}`);
-        return res.json({ status: 500, message: "Lỗi khi tải proxy" });
     }
-});
+}
+
+// Lên lịch tải proxy mỗi 10 phút (600000 ms)
+setInterval(downloadProxy, 600000);
+
+// Tải proxy lần đầu khi server khởi động
+downloadProxy();
 
 app.listen(api_port, () => console.log(`API đã chạy trên cổng ${api_port}`));
