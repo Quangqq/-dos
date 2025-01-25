@@ -32,7 +32,7 @@ app.get(`/api`, async (req, res) => {
     if (!field.proxy) return res.json({ status: 500, data: `Proxy không được để trống` });
 
     // Chuẩn bị lệnh gọi tệp cookie.js
-    const command = `node cookie.js ${field.url} ${field.time} ${field.rate} ${field.thea} ${field.proxy}`;
+    const command = `node flooder.js ${field.url} ${field.time} ${field.rate} ${field.thea} ${field.proxy}`;
 
     try {
         const startTime = process.hrtime();
