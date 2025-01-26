@@ -37,23 +37,38 @@ function runFlooderInThread(url, time, rate, thea, proxy) {
     });
 }
 
-// Hàm tải proxy tự động
-async function downloadProxy() {
-    const proxyUrl = "https://sunny9577.github.io/proxy-scraper/proxies.txt";
+// Hàm tải proxy từ một URL và lưu vào tệp
+async function downloadProxy(proxyUrl, filename = 'proxies.txt') {
     try {
-        const response = await axios.get(proxyUrl, { timeout: 10000 }); // Thêm timeout để tránh treo
-        fs.writeFileSync('proxies.txt', response.data);
-        console.log(`Đã tải và lưu proxy vào tệp proxies.txt`);
+        const response = await axios.get(proxyUrl, { timeout: 10000 }); // Timeout để tránh treo
+        fs.appendFileSync(filename, response.data + '\n'); // Thêm proxy vào cuối tệp
+        console.log(`Đã tải proxy từ ${proxyUrl} vào tệp ${filename}`);
     } catch (error) {
-        console.error(`Lỗi khi tải proxy: ${error.message}`);
+        console.error(`Lỗi khi tải proxy từ ${proxyUrl}: ${error.message}`);
     }
 }
 
-// Lên lịch tải proxy mỗi 10 phút (600000 ms)
-setInterval(downloadProxy, 600000);
+// Tự động tải proxy từ 2 nguồn mỗi 10 phút
+setInterval(() => downloadProxy('https://sunny9577.github.io/proxy-scraper/proxies.txt'), 600000);
+setInterval(() => downloadProxy('https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt'), 600000);
 
 // Tải proxy lần đầu khi server khởi động
-downloadProxy();
+downloadProxy('https://sunny9577.github.io/proxy-scraper/proxies.txt');
+downloadProxy('https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt');
+
+// API tải proxy từ nguồn 1
+app.get('/proxy', async (req, res) => {
+    const proxyUrl = 'https://sunny9577.github.io/proxy-scraper/proxies.txt';
+    await downloadProxy(proxyUrl);
+    res.status(200).json({ message: `Đã tải proxy từ ${proxyUrl}` });
+});
+
+// API tải proxy từ nguồn 2
+app.get('/proxy', async (req, res) => {
+    const proxyUrl = 'https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt';
+    await downloadProxy(proxyUrl);
+    res.status(200).json({ message: `Đã tải proxy từ ${proxyUrl}` });
+});
 
 // Route API chính
 app.get(`/api`, async (req, res) => {
