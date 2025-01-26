@@ -34,14 +34,6 @@ function runFlooderInThread(url, time, rate, thea, proxy) {
             console.error(`[WORKER ERROR] ${error}`);
             reject(error);
         });
-
-        worker.on('exit', (code) => {
-            if (code === 0) {
-                resolve(`Worker finished successfully.`);
-            } else {
-                reject(`Worker stopped with exit code ${code}`);
-            }
-        });
     });
 }
 
@@ -98,8 +90,7 @@ app.get(`/api`, async (req, res) => {
 
     // Chạy worker cho từng yêu cầu
     try {
-        const result = await runFlooderInThread(url, time, rate, thea, proxy);
-        console.log(`[SUCCESS] ${result}`);
+        await runFlooderInThread(url, time, rate, thea, proxy);
     } catch (error) {
         console.error(`[ERROR] Worker failed: ${error}`);
     }
