@@ -10,6 +10,72 @@ const api_key = "quangdev"; // Khóa API của bạn
 const app = express();
 app.use(express.json());
 
+// Các API proxy
+const proxyApis = [
+    "https://sunny9577.github.io/proxy-scraper/proxies.txt",
+    "https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt",
+    "https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
+    "https://www.proxy-list.download/api/v1/get?type=http",
+    "https://api.openproxylist.xyz/http.txt",
+    "http://alexa.lr2b.com/proxylist.txt",
+    "https://multiproxy.org/txt_all/proxy.txt",
+    "https://api.proxyscrape.com/v2/?request=getproxies&protocol=http",
+    "https://openproxylist.xyz/http.txt",
+    "https://proxyspace.pro/http.txt",
+    "https://proxyspace.pro/https.txt",
+    "https://rootjazz.com/proxies/proxies.txt",
+    "https://www.proxy-list.download/api/v1/get?type=https",
+    "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
+    "https://raw.githubusercontent.com/almroot/proxylist/master/list.txt",
+    "https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt",
+    "https://raw.githubusercontent.com/complexorganizations/proxy-registry/main/assets/history",
+    "https://raw.githubusercontent.com/drakelam/Free-Proxy-List/main/proxy_all.txt",
+    "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/http.txt",
+    "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/https.txt",
+    "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks4.txt",
+    "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks5.txt",
+    "https://raw.githubusercontent.com/hendrikbgr/Free-Proxy-Repo/master/proxy_list.txt",
+    "https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/archive/txt/proxies.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/archive/txt/proxies-http.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/archive/txt/proxies-https.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/archive/txt/proxies-socks4.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/archive/txt/proxies-socks5.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-http.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-https.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks4.txt",
+    "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt",
+    "https://raw.githubusercontent.com/KUTlime/ProxyList/main/ProxyList.txt",
+    "https://raw.githubusercontent.com/mmpx12/proxy-list/master/http.txt",
+    "https://raw.githubusercontent.com/mmpx12/proxy-list/master/https.txt",
+    "https://raw.githubusercontent.com/mmpx12/proxy-list/master/socks4.txt",
+    "https://raw.githubusercontent.com/mmpx12/proxy-list/master/socks5.txt",
+    "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt",
+    "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks4.txt",
+    "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt",
+    "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/http.txt",
+    "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks4.txt",
+    "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks5.txt",
+    "https://raw.githubusercontent.com/prxchk/proxy-list/main/all.txt",
+    "https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt",
+    "https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS4_RAW.txt",
+    "https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS5_RAW.txt",
+    "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/http.txt",
+    "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/https.txt",
+    "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks4.txt",
+    "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks5.txt",
+    "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/proxies.txt",
+    "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt",
+    "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt",
+    "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt",
+    "https://raw.githubusercontent.com/TundzhayDzhansaz/proxy-list-auto-pull-in-30min/main/proxies/http.txt",
+    "https://raw.githubusercontent.com/Volodichev/proxy-list/main/http.txt",
+    "https://www.proxy-list.download/api/v1/get?type=http",
+    "https://www.proxy-list.download/api/v1/get?type=https",
+    "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks4.txt"
+];
+
 // Hàm kiểm tra URL nâng cao
 const isValidUrl = (url) => validator.isURL(url, { protocols: ['http', 'https'], require_protocol: true });
 
@@ -48,26 +114,27 @@ async function downloadProxy(proxyUrl, filename = 'proxies.txt') {
     }
 }
 
-// Tự động tải proxy từ 2 nguồn mỗi 10 phút
-setInterval(() => downloadProxy('https://sunny9577.github.io/proxy-scraper/proxies.txt'), 600000);
-setInterval(() => downloadProxy('https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt'), 600000);
+// Hàm tải proxy từ nhiều nguồn
+async function downloadProxiesFromApis(proxyApis, filename = 'proxies.txt') {
+    for (const api of proxyApis) {
+        await downloadProxy(api, filename);
+    }
+}
+
+// Tự động tải proxy từ các API mỗi 10 phút
+setInterval(() => downloadProxiesFromApis(proxyApis), 600000);
 
 // Tải proxy lần đầu khi server khởi động
-downloadProxy('https://sunny9577.github.io/proxy-scraper/proxies.txt');
-downloadProxy('https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt');
+downloadProxiesFromApis(proxyApis);
 
-// API tải proxy từ nguồn 1
+// API tải proxy từ tất cả nguồn
 app.get('/proxy', async (req, res) => {
-    const proxyUrl = 'https://sunny9577.github.io/proxy-scraper/proxies.txt';
-    await downloadProxy(proxyUrl);
-    res.status(200).json({ message: `Đã tải proxy từ ${proxyUrl}` });
-});
-
-// API tải proxy từ nguồn 2
-app.get('/proxy', async (req, res) => {
-    const proxyUrl = 'https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt';
-    await downloadProxy(proxyUrl);
-    res.status(200).json({ message: `Đã tải proxy từ ${proxyUrl}` });
+    try {
+        await downloadProxiesFromApis(proxyApis);
+        res.status(200).json({ message: `Đã tải proxy từ các nguồn.` });
+    } catch (error) {
+        res.status(500).json({ message: `Lỗi khi tải proxy: ${error.message}` });
+    }
 });
 
 // Route API chính
