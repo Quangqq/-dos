@@ -114,7 +114,7 @@ crypto.constants.SSL_OP_SINGLE_DH_USE |
 crypto.constants.SSL_OP_SINGLE_ECDH_USE |
 crypto.constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION;
 
-const secureProtocol = "TLS_client_method";"TLSv1_3_method","TLS_method";
+const secureProtocol = "TLS_client_method";"TLSv1_3_method","TLS_method","TLSv1_2_method","TLSv1_1_method";
 const headers = {};
 
 const secureContextOptions = {
