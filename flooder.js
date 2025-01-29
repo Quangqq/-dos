@@ -1,9 +1,10 @@
 /*
 
 Method created by @ThaiDuongScript
+mod create @quangnqtoolcode
 
 
-Currently now im selling some script
+Currently now im selling some script buy hotline @ThaiDuongScript
 
  20$ - tor - HTTP/2 Flooder with 100% HTTP-DDoS Bypass && High Request per Second
 10$ - rst - HTTP/2 method bypass custom rule,bypass manage bot,bypass cloudflare,amazon,ovh,...
@@ -18,6 +19,9 @@ const crypto = require("crypto");
 const fs = require("fs");
 var colors = require("colors");
 const v8 = require("v8");
+const axios = require('axios');
+const https = require('https');
+ 
 function randstr(length) {
    const characters =
      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
