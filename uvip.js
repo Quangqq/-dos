@@ -6,7 +6,7 @@ const { url, time, rate, thea, proxy } = workerData;
 
 // Hàm chạy flooder.js
 function runFlooder() {
-    const flooder = spawn('node', ['UraVip.js', url, time, rate, thea, proxy]);
+    const flooder = spawn('node', ['bypass_1.js', url, time, rate, thea, proxy]);
 
     flooder.stdout.on('data', (data) => {
         parentPort.postMessage(`Output: ${data}`);
@@ -18,10 +18,10 @@ function runFlooder() {
 
     flooder.on('close', (code) => {
         if (code === 0) {
-            parentPort.postMessage('Flooder finished successfully.');
+            parentPort.postMessage('Flooder successfully.');
             process.exit(0);
         } else {
-            parentPort.postMessage(`Flooder exited with code ${code}`);
+            parentPort.postMessage(`Flooder Success ${code}`);
             process.exit(1);
         }
     });
