@@ -10,6 +10,13 @@ const api_key = "quangdev"; // Khóa API của bạn
 const app = express();
 app.use(express.json());
 
+// Các API proxy
+const proxyApis = [
+    "https://sunny9577.github.io/proxy-scraper/proxies.txt",
+    "https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt",
+    "https://www.proxyscan.io/download?type=https"
+];
+
 // Hàm kiểm tra URL nâng cao
 const isValidUrl = (url) => validator.isURL(url, { protocols: ['http', 'https'], require_protocol: true });
 
@@ -37,23 +44,39 @@ function runFlooderInThread(url, time, rate, thea, proxy) {
     });
 }
 
-// Hàm tải proxy tự động
-async function downloadProxy() {
-    const proxyUrl = "https://sunny9577.github.io/proxy-scraper/proxies.txt";
+// Hàm tải proxy từ một URL và lưu vào tệp
+async function downloadProxy(proxyUrl, filename = 'proxies.txt') {
     try {
-        const response = await axios.get(proxyUrl, { timeout: 10000 }); // Thêm timeout để tránh treo
-        fs.writeFileSync('proxies.txt', response.data);
-        console.log(`Đã tải và lưu proxy vào tệp proxies.txt`);
+        const response = await axios.get(proxyUrl, { timeout: 10000 }); // Timeout để tránh treo
+        fs.appendFileSync(filename, response.data + '\n'); // Thêm proxy vào cuối tệp
+        console.log(`Đã tải proxy từ ${proxyUrl} vào tệp ${filename}`);
     } catch (error) {
-        console.error(`Lỗi khi tải proxy: ${error.message}`);
+        console.error(`Lỗi khi tải proxy từ ${proxyUrl}: ${error.message}`);
     }
 }
 
-// Lên lịch tải proxy mỗi 10 phút (600000 ms)
-setInterval(downloadProxy, 600000);
+// Hàm tải proxy từ nhiều nguồn
+async function downloadProxiesFromApis(proxyApis, filename = 'proxies.txt') {
+    for (const api of proxyApis) {
+        await downloadProxy(api, filename);
+    }
+}
+
+// Tự động tải proxy từ các API mỗi 10 phút
+setInterval(() => downloadProxiesFromApis(proxyApis), 600000);
 
 // Tải proxy lần đầu khi server khởi động
-downloadProxy();
+downloadProxiesFromApis(proxyApis);
+
+// API tải proxy từ tất cả nguồn
+app.get('/proxy', async (req, res) => {
+    try {
+        await downloadProxiesFromApis(proxyApis);
+        res.status(200).json({ message: `Đã tải proxy từ các nguồn.` });
+    } catch (error) {
+        res.status(500).json({ message: `Lỗi khi tải proxy: ${error.message}` });
+    }
+});
 
 // Route API chính
 app.get(`/api`, async (req, res) => {
