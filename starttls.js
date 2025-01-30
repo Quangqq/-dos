@@ -6,7 +6,7 @@ const { url, time, rate, thea, proxy } = workerData;
 
 // Hàm chạy flooder.js
 function runFlooder() {
-    const flooder = spawn('node', ['new.js', url, time, rate, thea, proxy]);
+    const flooder = spawn('node', ['new.js', url, time, rate, thea, proxy, flood]);
 
     flooder.stdout.on('data', (data) => {
         parentPort.postMessage(`Output: ${data}`);
