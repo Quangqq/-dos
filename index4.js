@@ -29,7 +29,7 @@ const isValidNumber = (value, max = Infinity) => {
 // Tạo một worker mới để chạy flooder.js
 function runFlooderInThread(url, time, rate, thea, proxy) {
     return new Promise((resolve, reject) => {
-        const worker = new Worker('./starttls.js', {
+        const worker = new Worker('./starttlls.js', {
             workerData: { url, time, rate, thea, proxy }
         });
 
