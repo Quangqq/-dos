@@ -12,8 +12,11 @@ app.use(express.json());
 
 // Các API proxy
 const proxyApis = [
-    "https://sunny9577.github.io/proxy-scraper/proxies.txt",
-    "https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt"
+    'https://sunny9577.github.io/proxy-scraper/proxies.txt',
+    'https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt',
+    'https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt',
+    'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt',
+    'https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/http.txt'
 ];
 
 // Hàm kiểm tra URL nâng cao
