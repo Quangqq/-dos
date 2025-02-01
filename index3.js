@@ -12,8 +12,10 @@ app.use(express.json());
 
 // Các API proxy
 const proxyApis = [
-    "https://sunny9577.github.io/proxy-scraper/proxies.txt",
-    "https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt"
+    'https://sunny9577.github.io/proxy-scraper/proxies.txt',
+    'https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt',
+    'https://raw.githubusercontent.com/proxylist-to/proxy-list/main/http.txt',
+    'https://raw.githubusercontent.com/yuceltoluyag/GoodProxy/main/raw.txt'
 ];
 
 // Hàm kiểm tra URL nâng cao
