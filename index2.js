@@ -12,9 +12,10 @@ app.use(express.json());
 
 // Các API proxy
 const proxyApis = [
-    "https://sunny9577.github.io/proxy-scraper/proxies.txt",
-    "https://sunny9577.github.io/proxy-scraper/generated/http_proxies.txt",
-    "https://www.proxyscan.io/download?type=https"
+    'https://www.proxyscan.io/download?type=https',
+    'https://raw.githubusercontent.com/officialputuid/KangProxy/KangProxy/http/http.txt',
+    'https://raw.githubusercontent.com/prxchk/proxy-list/main/http.txt',
+    'https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt',
 ];
 
 // Hàm kiểm tra URL nâng cao
